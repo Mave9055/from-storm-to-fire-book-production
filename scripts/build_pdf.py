@@ -1,97 +1,118 @@
+import argparse
 import os
-from fpdf import FPDF
+import glob
+from pathlib import Path
+import markdown
+from weasyprint import HTML, CSS
 
-class DarkEbookPDF(FPDF):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.author_name = "Bret Lingar"
-        self.book_title = "From the Storm to the Fire"
-        self.subtitle = "A Peer-Written Trauma-Informed Survival Resource"
+BASE_DIR = Path(__file__).resolve().parent.parent
+TEMPLATES_DIR = BASE_DIR / "interior" / "templates"
 
-    def header(self):
-        if self.page_no() > 1:
-            self.set_font('Arial', 'I', 8)
-            self.set_text_color(100, 100, 100)
-            self.cell(0, 10, f'{self.book_title} - {self.author_name}', 0, 0, 'R')
+def load_chapters(input_dir, max_chapters=None):
+    chapter_files = sorted(glob.glob(os.path.join(input_dir, "*.md")))
+    chapters = []
 
-    def footer(self):
-        if self.page_no() > 1:
-            self.set_y(-15)
-            self.set_font('Arial', 'I', 8)
-            self.set_text_color(150, 150, 150)
-            self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
+    if max_chapters is not None:
+        chapter_files = chapter_files[:max_chapters]
 
-    def chapter_title(self, title):
-        self.add_page()
-        # Dark background for chapter opener
-        self.set_fill_color(18, 18, 18) # Charcoal
-        self.rect(0, 0, 210, 297, 'F')
-        
-        # Gold border for chapter opener
-        self.set_draw_color(255, 215, 0) # Gold
-        self.set_line_width(1)
-        self.rect(10, 10, 190, 277)
-        
-        self.set_y(100)
-        self.set_font('Arial', 'B', 24)
-        self.set_text_color(255, 140, 0) # Orange/Fire
-        self.multi_cell(0, 15, title.upper(), 0, 'C')
-        
-        self.set_y(250)
-        self.set_font('Arial', '', 10)
-        self.set_text_color(255, 215, 0) # Gold
-        self.cell(0, 10, self.subtitle, 0, 1, 'C')
-        self.cell(0, 10, self.author_name, 0, 1, 'C')
+    for idx, filepath in enumerate(chapter_files, start=1):
+        with open(filepath, "r", encoding="utf-8") as f:
+            text = f.read()
 
-    def chapter_body(self, body):
-        self.set_font('Arial', '', 12)
-        self.set_text_color(224, 224, 224) # Off-white
-        self.multi_cell(0, 10, body)
-        self.ln()
+        lines = text.splitlines()
+        title = None
+        body_lines = []
 
-    def add_styled_page(self):
-        self.add_page()
-        self.set_fill_color(18, 18, 18) # Charcoal
-        self.rect(0, 0, 210, 297, 'F')
+        for line in lines:
+            if line.startswith("## ") and title is None:
+                title = line[3:].strip()
+            else:
+                body_lines.append(line)
 
-def create_sample_pdf(output_path, title_text):
-    pdf = DarkEbookPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    
-    # Chapter 1
-    pdf.chapter_title("Chapter 1: The Gathering Storm")
-    pdf.add_styled_page()
-    content = (
-        "The sky turned a bruised purple, the kind of color that promised nothing but destruction. "
-        "Lightning arced across the horizon, a jagged gold vein in the heart of the darkness. "
-        "This was the beginning. From the storm, the fire would rise.\n\n"
-        "Placeholder text for the manuscript. The readability is maintained with off-white text "
-        "against a dark charcoal background, ensuring a cinematic feel without sacrificing the "
-        "reader's experience. This resource is trauma-informed and peer-written for survival."
+        if title is None:
+            title = f"Chapter {idx}"
+
+        body_md = "\n".join(body_lines).strip()
+        body_html = markdown.markdown(body_md)
+
+        chapters.append(
+            {
+                "number": idx,
+                "title": title,
+                "subtitle": "",
+                "html_body": body_html,
+            }
+        )
+
+    return chapters
+
+def build_html(title, author, chapters):
+    html_parts = [
+        "<!DOCTYPE html>",
+        "<html lang='en'>",
+        "<head>",
+        f"<meta charset='UTF-8' />",
+        f"<title>{title}</title>",
+        "</head>",
+        "<body>",
+    ]
+
+    for chapter in chapters:
+        # Chapter opener
+        html_parts.append("<section class='page page--chapter-opener'>")
+        html_parts.append("<div class='content'>")
+        html_parts.append(
+            f"<div class='chapter-label'>Chapter {chapter['number']}</div>"
+        )
+        html_parts.append(f"<h1>{chapter['title']}</h1>")
+        if chapter.get("subtitle"):
+            html_parts.append(f"<div class='subtitle'>{chapter['subtitle']}</div>")
+        html_parts.append("</div></section>")
+
+        # Normal reading page
+        html_parts.append("<section class='page page--normal'>")
+        html_parts.append("<div class='content'>")
+        html_parts.append(chapter["html_body"])
+        html_parts.append("</div></section>")
+
+    html_parts.append("</body></html>")
+    return "\n".join(html_parts)
+
+def main():
+    parser = argparse.ArgumentParser(description="Build styled PDF from chapters.")
+    parser.add_argument("--input-dir", required=True, help="Directory with .md chapters")
+    parser.add_argument("--output", required=True, help="Output PDF path")
+    parser.add_argument("--title", required=True, help="Book title")
+    parser.add_argument("--author", required=True, help="Author name")
+    parser.add_argument(
+        "--max-chapters",
+        type=int,
+        default=None,
+        help="Optional: limit number of chapters (for samples)",
     )
-    pdf.chapter_body(content * 5) # Repeat to fill page
+
+    args = parser.parse_args()
+
+    chapters = load_chapters(args.input_dir, args.max_chapters)
+    if not chapters:
+        print(f"No .md files found in {args.input_dir}")
+        return
+
+    html_content = build_html(args.title, args.author, chapters)
+
+    css_path = TEMPLATES_DIR / "ebook-style.css"
+    if not css_path.exists():
+        print(f"CSS file not found: {css_path}")
+        return
+
+    html = HTML(string=html_content, base_url=str(TEMPLATES_DIR))
+    css = CSS(filename=str(css_path))
+
+    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     
-    # Chapter 2
-    pdf.chapter_title("Chapter 2: The Rising Fire")
-    pdf.add_styled_page()
-    content_2 = (
-        "Embers danced in the wind, carrying the scent of scorched earth. What the storm had "
-        "broken, the fire would now consume. It was a cycle as old as time itself. "
-        "Bret Lingar's journey through the trial by fire leads to a new purpose."
-    )
-    pdf.chapter_body(content_2 * 5)
-    
-    pdf.output(output_path)
+    html.write_pdf(str(output_path), stylesheets=[css])
+    print(f"Successfully generated PDF at: {output_path}")
 
 if __name__ == "__main__":
-    exports_dir = "exports"
-    if not os.path.exists(exports_dir):
-        os.makedirs(exports_dir)
-        
-    print("Generating Early Reader Edition...")
-    create_sample_pdf(os.path.join(exports_dir, "From-the-Storm-to-the-Fire-Early-Reader-Edition.pdf"), "Full Edition")
-    
-    print("Generating Free Sample...")
-    create_sample_pdf(os.path.join(exports_dir, "From-the-Storm-to-the-Fire-Free-Sample.pdf"), "Free Sample")
-    
-    print("Done!")
+    main()
