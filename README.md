@@ -1,6 +1,6 @@
 # From Storm to Fire: Book Production Repo
 
-This repository is designed to manage the production and maintenance of the ebook **"From the Storm to the Fire"**. It provides a repeatable workflow to turn a manuscript into a polished, branded PDF ebook with a cinematic dark storm/fire visual style.
+This repository is designed to manage the production and maintenance of the ebook **"From the Storm to the Fire"** by **Bret Lingar**. Subtitled **"A Peer-Written Trauma-Informed Survival Resource"**, it provides a repeatable workflow to turn a manuscript into a polished, branded PDF ebook with a cinematic dark storm/fire visual style.
 
 ## Repository Structure
 

@@ -5,9 +5,11 @@ This document defines the CSS/Style rules for the "From Storm to Fire" ebook pro
 ## Color Palette
 - **Primary Background:** `#121212` (Charcoal/Black)
 - **Primary Text:** `#E0E0E0` (Off-white)
-- **Heading 1 (Chapter Titles):** `#FF8C00` (Dark Orange/Fire)
-- **Heading 2/3:** `#FFD700` (Gold)
-- **Accents/Borders:** `#FFD700` (Gold)
+- **Heading 1 (Chapter Titles):** `#FF8C00` (Dark Orange/Fire) with textured/distressed effect.
+- **Heading 2/3:** `#FFFFFF` (White) or `#FFD700` (Gold).
+- **Accents/Borders:** `#FFD700` (Gold) with cinematic light flares.
+- **Author Name:** Bret Lingar
+- **Subtitle:** A Peer-Written Trauma-Informed Survival Resource
 
 ## Typography
 - **Body Text:** Serif font (e.g., Georgia, Crimson Text) for readability.

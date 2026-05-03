@@ -2,15 +2,24 @@ import os
 from fpdf import FPDF
 
 class DarkEbookPDF(FPDF):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.author_name = "Bret Lingar"
+        self.book_title = "From the Storm to the Fire"
+        self.subtitle = "A Peer-Written Trauma-Informed Survival Resource"
+
     def header(self):
-        # We can add a subtle border or header here if needed
-        pass
+        if self.page_no() > 1:
+            self.set_font('Arial', 'I', 8)
+            self.set_text_color(100, 100, 100)
+            self.cell(0, 10, f'{self.book_title} - {self.author_name}', 0, 0, 'R')
 
     def footer(self):
-        self.set_y(-15)
-        self.set_font('Arial', 'I', 8)
-        self.set_text_color(150, 150, 150)
-        self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
+        if self.page_no() > 1:
+            self.set_y(-15)
+            self.set_font('Arial', 'I', 8)
+            self.set_text_color(150, 150, 150)
+            self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
 
     def chapter_title(self, title):
         self.add_page()
@@ -23,10 +32,16 @@ class DarkEbookPDF(FPDF):
         self.set_line_width(1)
         self.rect(10, 10, 190, 277)
         
+        self.set_y(100)
         self.set_font('Arial', 'B', 24)
         self.set_text_color(255, 140, 0) # Orange/Fire
-        self.cell(0, 100, title.upper(), 0, 1, 'C')
-        self.ln(20)
+        self.multi_cell(0, 15, title.upper(), 0, 'C')
+        
+        self.set_y(250)
+        self.set_font('Arial', '', 10)
+        self.set_text_color(255, 215, 0) # Gold
+        self.cell(0, 10, self.subtitle, 0, 1, 'C')
+        self.cell(0, 10, self.author_name, 0, 1, 'C')
 
     def chapter_body(self, body):
         self.set_font('Arial', '', 12)
@@ -52,7 +67,7 @@ def create_sample_pdf(output_path, title_text):
         "This was the beginning. From the storm, the fire would rise.\n\n"
         "Placeholder text for the manuscript. The readability is maintained with off-white text "
         "against a dark charcoal background, ensuring a cinematic feel without sacrificing the "
-        "reader's experience."
+        "reader's experience. This resource is trauma-informed and peer-written for survival."
     )
     pdf.chapter_body(content * 5) # Repeat to fill page
     
@@ -61,7 +76,8 @@ def create_sample_pdf(output_path, title_text):
     pdf.add_styled_page()
     content_2 = (
         "Embers danced in the wind, carrying the scent of scorched earth. What the storm had "
-        "broken, the fire would now consume. It was a cycle as old as time itself."
+        "broken, the fire would now consume. It was a cycle as old as time itself. "
+        "Bret Lingar's journey through the trial by fire leads to a new purpose."
     )
     pdf.chapter_body(content_2 * 5)
     
