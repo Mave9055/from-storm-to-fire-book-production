@@ -94,3 +94,8 @@ python3 scripts/build_pdf.py --input-dir book/chapters --output exports/final-pa
 - Keep the manuscript readable (plain Markdown).
 - Use the dark storm/fire style for branding, but keep body pages clean and easy to read.
 - Chapter openers are cinematic; normal pages are calmer and more minimal.
+
+---
+
+> [!WARNING]
+> **Do not upload placeholder exports to Payhip.** Ensure you have replaced the sample chapters in `/book/chapters` with your actual manuscript before generating the final files for distribution.
