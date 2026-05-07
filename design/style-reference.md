@@ -75,3 +75,22 @@
 - Storm/fire is a **mood**, not a distraction:
   - No heavy textures behind body text.
   - Keep the drama on chapter openers and section breaks.
+
+## Advanced Narrative Principles
+
+### The Spiral Staircase
+The manuscript follows a nonlinear, spiral structure. While the narrative loops back to core themes (addiction, trauma bonds, nervous system regulation), the **view must change with each loop**.
+- **Trust the reader:** Do not re-explain psychological mechanics once established.
+- **Escalate the stakes:** Focus on the immediate new friction of the scene.
+- **Accumulating weight:** The reader's fatigue should come from the events, not the repetition of analysis.
+
+### Skin vs. X-Ray
+Think of clinical terms as the X-ray and sensory scenes as the skin.
+- **Feel the pulse first:** Let the physical action and sensory details do the heavy emotional lifting.
+- **Reveal the bone later:** Only after the reader is anchored in the visceral reality should the analytical or clinical voice take over.
+- **Show, don't just summarize:** Avoid summarizing major life events (like the steakhouse job or pregnancy); bring the reader into the physical space.
+
+### Modulating Pacing
+The syntax should mirror the state of the nervous system.
+- **Panic/Hyper-vigilance:** Use rapid-fire, staccato fragments to capture the high-tension baseline of survival mode.
+- **Stillness/Depression:** Use longer, flowing, compound sentences to provide physiological room to process. This contrast makes the return to staccato rhythms feel profoundly jarring and impactful.
