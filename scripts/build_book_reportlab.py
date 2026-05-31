@@ -263,10 +263,10 @@ def parse_chapter(content: str, fallback_num: int) -> Tuple[str, str, str]:
         return str(fallback_num), f"Chapter {fallback_num}", ""
 
     body = "\n".join(lines[title_index + 1 :]).strip()
-    num_match = re.search(r"\bchapter\s+([0-9ivxlcdm]+)\b", title_line, re.IGNORECASE)
+    num_match = re.search(r"\b(?:CHAPTER|PART)\s+([0-9ivxlcdm\d]+)\b", title_line, re.IGNORECASE)
     chapter_num = num_match.group(1).upper() if num_match else str(fallback_num)
     clean_title = re.sub(
-        r"^chapter\s+[0-9ivxlcdm]+\s*[:\-–—]*\s*",
+        r"^(?:CHAPTER|PART)\s+[0-9ivxlcdm\d]+\s*[:\-–—]*\s*",
         "",
         title_line,
         flags=re.IGNORECASE,
@@ -381,12 +381,23 @@ def build_book(
     story: list = []
     add_cover(story, title, subtitle, author)
 
+    chapter_count = 1
     for index, file_path in enumerate(files, start=1):
         content = file_path.read_text(encoding="utf-8")
-        num, chapter_title, body = parse_chapter(content, index)
+        num, chapter_title, body = parse_chapter(content, chapter_count)
         main_body, mechanism_text = split_mechanism(body)
 
-        story.extend(chapter_opener(num, chapter_title))
+        # Skip chapter label for front matter
+        is_front_matter = any(x in chapter_title.lower() for x in ["copyright", "dedication", "content note", "preface", "prologue"])
+        
+        if is_front_matter:
+            story.append(Spacer(1, 0.55 * inch))
+            story.append(Paragraph(clean_text(chapter_title), S["chapter_title"]))
+            story.append(gold_rule())
+            story.append(Spacer(1, 0.1 * inch))
+        else:
+            story.extend(chapter_opener(num, chapter_title))
+            chapter_count += 1
         add_markdown_blocks(story, main_body)
         if mechanism_text:
             add_mechanism(story, mechanism_text)
